@@ -286,7 +286,7 @@ function initText() {
             paused: false,
                 
             onComplete: () => {
-              window.location.href = "./";
+              window.location.href = "./belowground";
             }
           });
           gsap.to(camTarget, {
