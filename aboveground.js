@@ -1,16 +1,16 @@
 import * as THREE from "three";
 import * as TWEEN from "@tweenjs/tween.js";
-import Stats from "@tweenjs/tween.js";
-import { OrbitControls } from "/three/examples/jsm/controls/OrbitControls";
+import Stats from "three/addons/libs/stats.module.js";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import * as YUKA from "yuka";
 import { Light } from "three";
-import { randFloat } from "/three/src/math/mathutils.js";
+import { randFloat } from "three/src/math/mathutils.js";
 import { SeekBehavior, Vector3 } from "yuka";
-import { EffectComposer } from "/three/addons/postprocessing/EffectComposer.js";
-import { RenderPass } from "/three/addons/postprocessing/RenderPass.js";
-import { UnrealBloomPass } from "/three/addons/postprocessing/UnrealBloomPass.js";
+import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
+import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
+import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
 import { SSAARenderPass } from 'three/addons/postprocessing/SSAARenderPass.js';
-import { ShaderPass } from '/three/addons/postprocessing/ShaderPass.js';
+import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { CSS3DRenderer, CSS3DObject } from 'three/addons/renderers/CSS3DRenderer.js';
 
 import { GUI } from "three/addons/libs/lil-gui.module.min.js";
