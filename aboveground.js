@@ -12,6 +12,7 @@ import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js"
 import { SSAARenderPass } from 'three/addons/postprocessing/SSAARenderPass.js';
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { CSS3DRenderer, CSS3DObject } from 'three/addons/renderers/CSS3DRenderer.js';
+import { OutlinePass } from 'three/addons/postprocessing/OutlinePass.js';
 
 import { GUI } from "three/addons/libs/lil-gui.module.min.js";
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
@@ -34,7 +35,8 @@ let main, objectCSS;
 // let grassplane;
 let adscreen;
 let titlePos;
-
+let selectedObjects = [];
+let outlinePass
 let raycaster = new THREE.Raycaster();
 let mouse = new THREE.Vector2();
 
@@ -78,7 +80,7 @@ const ENTIRE_SCENE = 0, BLOOM_SCENE = 1;
 const bloomLayer = new THREE.Layers();
 bloomLayer.set( BLOOM_SCENE );
 let bloomComposer;
-const NUMLIGHTS = 20;
+const NUMLIGHTS = 25;
 
 
 
@@ -125,7 +127,7 @@ Promise.all([
       
       let newMat = new THREE.MeshPhongMaterial();
       newMat.vertexColors = true
-
+      newMat.shadowMap = true
       node.material = newMat
       if (node.name.includes("text")) {
         node.layers.enable( BLOOM_SCENE )
@@ -244,9 +246,9 @@ function initScreen() {
 function initText() {
   // screentex.offset.x = 0.5;
 
-  let tex1 = new THREE.TextureLoader().load("./textures/hello.png")
+  let tex1 = new THREE.TextureLoader().load("./textures/title.png")
   tex1.flipY = false;
-  let tex2 = new THREE.TextureLoader().load("./textures/projects.png")
+  let tex2 = new THREE.TextureLoader().load("./textures/enter.png")
   tex2.flipY = false;
   // screentex.offset.y = 0.5;
   for(let object of textarray){
@@ -286,7 +288,7 @@ function initText() {
             paused: false,
                 
             onComplete: () => {
-              window.location.href = "./belowground";
+              window.location.href = "https://below.fennecdeer.com";
             }
           });
           gsap.to(camTarget, {
@@ -364,10 +366,10 @@ function initFireflies(){
 
   for (let i = 0; i < NUMLIGHTS; i++) {
     const light = new THREE.Mesh(
-      new THREE.SphereGeometry(0.05, 8, 8),
+      new THREE.SphereGeometry(0.08, 8, 8),
       new THREE.MeshBasicMaterial({ color: 0xffffff })
     );
-    const source = new THREE.PointLight(0xffffff, 1, 2);
+    const source = new THREE.PointLight(0xfaba82, 1, 2);
     // const light = new THREE.Group();
     // light.add(source)
     // light.add(orb)
@@ -425,7 +427,7 @@ function init() {
   // scene.background = new THREE.Color(0x01000);
   //
   //scene.background = new THREE.Color().setHSL( 0.6, 0, 1 );
-  scene.fog = new THREE.Fog( new THREE.Color(0x00000), 10, 50 );
+  scene.fog = new THREE.Fog( new THREE.Color(0x271430), 15, 50 );
 
   // skyhdr.mapping = THREE.EquirectangularReflectionMapping;
 
@@ -440,17 +442,18 @@ function init() {
   initScreen()
   initText()
   //initGrass()
-  var L1 = new THREE.PointLight(0xb887ed, 1.5);
-  L1.position.z = 50;
-  L1.position.y = 20;
-  L1.position.x = 20;
+  var L1 = new THREE.PointLight(0xb482fa, 1.5);
+  L1.position.z = 10;
+  L1.position.y = 40;
+  L1.position.x = -20;
+  L1.castShadow = true;
   scene.add(L1);
   // Dark Purple Pointlight
-  var L2 = new THREE.PointLight(0x436ce8, 1.5);
+  var L2 = new THREE.PointLight(0xf5d7dc, 1.5);
   L2.position.z = 40;
   L2.position.y = -50;
   L2.position.x = -20;
-  // scene.add(L2);
+  scene.add(L2);
 
   // Phong material, Grey, Emissive
   var greyPhongMat = new THREE.MeshPhongMaterial({
@@ -501,12 +504,12 @@ function init() {
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.toneMapping = THREE.ReinhardToneMapping;
-  // renderer.useLegacyLights = true;
-  renderer.alpha = true;
+  renderer.useLegacyLights = true;
+  // renderer.alpha = true;
   renderer.setClearColor( 0x000000, 0 );
 
   renderer.shadowMap.enabled = true
-  renderer.debug.checkShaderErrors = false;
+  // renderer.debug.checkShaderErrors = false;
   
   stats = new Stats();
   container.appendChild(renderer.domElement)
@@ -526,6 +529,7 @@ function init() {
     ease: "power1.inOut",
     paused: false
   });
+  controls.enabled = false
   controls.target = camTarget
   // controls.target = new THREE.Vector3(0,0,0)
   
@@ -548,6 +552,8 @@ function init() {
   bloomComposer.addPass( renderScene );
   bloomComposer.addPass( bloomPass );
 
+  outlinePass = new OutlinePass( new THREE.Vector2( window.innerWidth, window.innerHeight ), scene, camera );
+  
   const finalPass = new ShaderPass(
     new THREE.ShaderMaterial( {
       uniforms: {
@@ -570,8 +576,9 @@ function init() {
     )
     );
     
-   
+    
     composer.addPass(renderScene);
+    composer.addPass( outlinePass );
     
     // composer.addPass(ssaaRenderPass);
     composer.addPass( finalPass );
@@ -622,6 +629,8 @@ function init() {
 
   window.addEventListener("resize", onWindowResize);
   window.addEventListener("mousedown", onDocumentMouseDown)
+  renderer.domElement.addEventListener( 'pointermove', onPointerMove );
+
 
 }
 
@@ -633,6 +642,31 @@ function onWindowResize() {
   camera.updateProjectionMatrix();
 
   renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+function onPointerMove( event ) {
+
+  event.preventDefault();
+
+  mouse.x = ( event.clientX / renderer.domElement.clientWidth ) * 2 - 1;
+  mouse.y = - ( event.clientY / renderer.domElement.clientHeight ) * 2 + 1;
+
+  raycaster.setFromCamera( mouse, camera );
+
+  var intersects = raycaster.intersectObjects( textarray ); 
+
+  if ( intersects.length > 0 ) {
+
+      const selectedObject = intersects[ 0 ].object;
+			selectedObjects = [];
+			selectedObjects.push( selectedObject );
+      outlinePass.selectedObjects = selectedObjects;
+    } else {
+
+      outlinePass.selectedObjects = [];
+
+    }
+
 }
 
 function onDocumentMouseDown( event ) {
