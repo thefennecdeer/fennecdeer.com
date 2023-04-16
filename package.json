@@ -2,7 +2,6 @@
   "dependencies": {
     "@tweenjs/tween.js": "^19.0.0",
     "postprocessing": "^6.30.2",
-    "three": "^0.151.3",
     "vercel": "^28.18.5",
     "yuka": "^0.7.8"
   },
