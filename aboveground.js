@@ -4,7 +4,7 @@ import Stats from "three/addons/libs/stats.module.js";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import * as YUKA from "yuka";
 import { Light } from "three";
-import { randFloat } from "three/src/math/mathutils";
+import { randFloat } from "three/src/math/mathutils.js";
 import { SeekBehavior, Vector3 } from "yuka";
 import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
