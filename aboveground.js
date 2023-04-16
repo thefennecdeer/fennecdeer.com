@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import * as TWEEN from "@tweenjs/tween.js";
-import Stats from "/three/addons/libs/stats.module.js";
+import Stats from "@tweenjs/tween.js";
 import { OrbitControls } from "/three/examples/jsm/controls/OrbitControls";
 import * as YUKA from "yuka";
 import { Light } from "three";
